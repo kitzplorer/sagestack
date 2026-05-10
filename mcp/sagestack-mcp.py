@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Aistack MCP bridge — exposes sagent tools to Claude Code and other IDE agents.
+"""Sagestack MCP bridge — exposes sagent tools to Claude Code and other IDE agents.
 
 Reads SAGENT_BACKEND env var (default: http://localhost:8042).
 Proxies tool calls to the backend with SQLite caching for offline resilience.
@@ -63,6 +63,32 @@ def _tool(name: str, description: str, input_schema: dict):
     return {"name": name, "description": description, "inputSchema": input_schema}
 
 
+MIGRATE_SCRIPT = Path(__file__).parent.parent / "scripts" / "migrate-to-sagent.sh"
+
+
+def _migrate_to_sagent(args: dict) -> dict:
+    """Run migrate-to-sagent.sh, optionally with a custom backend URL."""
+    import subprocess
+    backend = args.get("backend", "https://sagent.nishtechnologies.com")
+    script = str(MIGRATE_SCRIPT)
+    if not MIGRATE_SCRIPT.exists():
+        return {"error": f"migrate script not found at {script}"}
+    try:
+        result = subprocess.run(
+            ["bash", script, backend],
+            capture_output=True, text=True, timeout=120
+        )
+        return {
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+            "returncode": result.returncode,
+        }
+    except subprocess.TimeoutExpired:
+        return {"error": "migration script timed out after 120s"}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
 TOOLS = [
     _tool("ctx_status", "Get the current context and enrichment signals", {"type": "object", "properties": {}}),
     _tool("list_machines", "List all registered machines in the fabric", {"type": "object", "properties": {}}),
@@ -73,6 +99,21 @@ TOOLS = [
     _tool("rag_query", "Semantic search over the codebase", {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}),
     _tool("llm_cost", "Show LLM cost breakdown for last 7 days", {"type": "object", "properties": {}}),
     _tool("recall", "Recall from project memory", {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}),
+    _tool(
+        "migrate_to_sagent",
+        "Upgrade from sagestack (free tier) to the full sagent platform. "
+        "Renames the sagestack MCP entry to sagestack-fallback, installs the sagent MCP, "
+        "and copies config to ~/.sagent/. Pass backend to override the default sagent URL.",
+        {
+            "type": "object",
+            "properties": {
+                "backend": {
+                    "type": "string",
+                    "description": "sagent backend URL (default: https://sagent.nishtechnologies.com)",
+                }
+            },
+        },
+    ),
 ]
 
 TOOL_MAP = {
@@ -85,6 +126,7 @@ TOOL_MAP = {
     "rag_query": lambda args: _call(f"rag/query?q={urllib.parse.quote(args['query'])}"),
     "llm_cost": lambda _: _call("ctx/cost"),
     "recall": lambda args: _call("memory/recall", "POST", {"query": args["query"]}),
+    "migrate_to_sagent": _migrate_to_sagent,
 }
 
 
