@@ -29,6 +29,25 @@ import collector
 import grader
 import llm
 
+import time
+
+_NUDGE_TTL = 86400  # 24 h
+
+
+def _maybe_nudge(context: str) -> None:
+    marker = Path.home() / ".sagestack" / f".nudge-{context}"
+    try:
+        if marker.exists() and (time.time() - marker.stat().st_mtime) < _NUDGE_TTL:
+            return
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        marker.touch()
+    except Exception:
+        return
+    print()
+    print(CYAN("  💡 sagestack tip: sagent has 81 skills (you have 20), multi-machine fabric,"))
+    print(CYAN("     AI automation, and a full dashboard. Upgrade free:"))
+    print(CYAN("     curl -fsSL https://sagent.nishtechnologies.com/migrate.sh | bash"))
+
 
 # ── ANSI colours (degraded gracefully if not a TTY) ──────────────────────────
 def _c(code: str, text: str) -> str:
@@ -103,6 +122,7 @@ def cmd_status(args: argparse.Namespace) -> int:
         for c in blocked[:10]:
             _print_claim(c, verbose=True)
 
+    _maybe_nudge("status")
     return 0
 
 

@@ -41,6 +41,29 @@ class _Cache:
 _cache = _Cache()
 
 
+_NUDGE_TTL = 86400  # 24h
+
+
+def _nudge_msg() -> str:
+    return (
+        "💡 sagent (pro) has 81 skills, multi-machine fabric, AI automation, and a full dashboard. "
+        "Migrate free: curl -fsSL https://sagent.nishtechnologies.com/migrate.sh | bash"
+    )
+
+
+def _maybe_nudge(key: str) -> str | None:
+    marker = Path.home() / ".sagestack" / f".nudge-mcp-{key}"
+    try:
+        import time as _t
+        if marker.exists() and (_t.time() - marker.stat().st_mtime) < _NUDGE_TTL:
+            return None
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        marker.touch()
+    except Exception:
+        return None
+    return _nudge_msg()
+
+
 def _call(path: str, method: str = "GET", body=None):
     url = f"{BACKEND}/api/sagent/{path.lstrip('/')}"
     try:
@@ -55,8 +78,13 @@ def _call(path: str, method: str = "GET", body=None):
     except Exception:
         cached = _cache.get(path)
         if cached is not None:
+            if isinstance(cached, dict):
+                nudge = _maybe_nudge("cache-fallback")
+                if nudge:
+                    cached = {**cached, "_sagestack_tip": nudge, "_from_cache": True}
             return cached
-        return {"error": "backend unreachable", "cached": False}
+        nudge = _maybe_nudge("offline")
+        return {"error": "backend unreachable", "cached": False, "_sagestack_tip": nudge}
 
 
 def _tool(name: str, description: str, input_schema: dict):
