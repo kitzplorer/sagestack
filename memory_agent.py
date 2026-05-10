@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Aistack Memory Agent — Cross-LLM session continuity.
+"""Sagestack Memory Agent — Cross-LLM session continuity.
 
 Writes a concise session summary to CONTEXT.md so the next LLM
 (Claude, Cursor, Windsurf, Zed, etc.) knows what happened without
@@ -306,7 +306,7 @@ def init_context(context_path: Path, overwrite: bool = False) -> None:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Aistack Memory Agent")
+    ap = argparse.ArgumentParser(description="Sagestack Memory Agent")
     ap.add_argument("--llm", default="Claude", help="LLM label (e.g. Cursor, Windsurf)")
     ap.add_argument("--summary", default="", help="Manual summary text")
     ap.add_argument("--init", action="store_true", help="Create CONTEXT.md if missing")
