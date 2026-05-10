@@ -1,0 +1,22 @@
+{
+  "backend": "http://localhost:8042",
+  "anthropic_api_key": "sk-ant-YOUR_KEY_HERE",
+  "ollama_url": "http://localhost:11434",
+  "ollama_model": "llama3",
+  "bar_raiser": {
+    "enabled": true,
+    "min_business_score": 7,
+    "min_coverage": 0.90,
+    "timeout_seconds": 8
+  },
+  "supervisor": {
+    "enabled": true,
+    "db_path": "~/.aistack/supervisor.db",
+    "grader_model": "claude-haiku-4-5"
+  },
+  "memory_agent": {
+    "enabled": true,
+    "llm": "Claude",
+    "context_lines": 80
+  }
+}

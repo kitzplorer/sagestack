@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Syntax check hooks
+        run: |
+          python3 -m py_compile hooks/bar_raiser.py
+          python3 -m py_compile hooks/supervisor_hooks.py
+          python3 -m py_compile memory_agent.py
+      - name: Syntax check supervisor
+        run: python3 -m py_compile supervisor/supervisor.py
+      - name: Shellcheck installer
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: scripts
+          severity: warning
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Supervisor CLI smoke test
+        run: python3 supervisor/supervisor.py status
+      - name: Memory agent help
+        run: python3 memory_agent.py --help
+      - name: Install script dry-run
+        run: bash scripts/aistack-install.sh --dry-run
