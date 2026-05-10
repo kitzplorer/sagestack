@@ -32,9 +32,9 @@ mcp__playwright__browser_wait_for    → wait for selector or network idle
 ### Persona test pattern (DOM-first, no screenshots)
 
 ```
-1. mcp__playwright__browser_navigate  url="http://localhost:3000/login"
+1. mcp__playwright__browser_navigate  url="http://localhost:8042/login"
 2. mcp__playwright__browser_snapshot  → read DOM, find form fields
-3. mcp__playwright__browser_type      selector="input[name=username]" text="admin"
+3. mcp__playwright__browser_type      selector="input[name=username]" text="kittu"
 4. mcp__playwright__browser_click     selector="button[type=submit]"
 5. mcp__playwright__browser_wait_for  selector=".dashboard" OR waitForLoadState="networkidle"
 6. mcp__playwright__browser_evaluate  expression="document.title"  → assert
@@ -53,6 +53,7 @@ mcp__playwright__browser_console_messages
 mcp__playwright__browser_network_requests
 
 # Evaluate arbitrary JS:
+mcp__playwright__browser_evaluate  expression="JSON.stringify(window.__SAGENT_STATE__)"
 mcp__playwright__browser_evaluate  expression="document.querySelectorAll('.error').length"
 ```
 
@@ -66,7 +67,7 @@ npm install -g agent-browser
 agent-browser install          # downloads Chrome
 
 # Basic commands
-agent-browser open <url>
+agent-browser open <url>       # navigate (keeps session warm)
 agent-browser click <sel>      # CSS selector or natural language description
 agent-browser type <sel> <text>
 agent-browser eval "<js>"      # returns value
@@ -74,47 +75,52 @@ agent-browser screenshot <path>
 agent-browser exists <sel>     # returns true/false
 agent-browser console          # dump console messages
 
-# Daemon mode (for many sequential commands)
+# Daemon mode (for many sequential commands — avoids repeated startup)
 agent-browser daemon start
 agent-browser open <url> --daemon
 agent-browser eval "..." --daemon
 agent-browser daemon stop
 ```
 
-**Performance reality:**
+**Performance reality (measured on [host]):**
 - Cold open: ~1–3s (no daemon), ~5–10s (daemon cold start)
+- Warm open (no daemon): ~800ms–1.6s
 - Playwright MCP navigate: ~300–800ms (session stays warm in MCP server)
+- Playwright test runner cold: ~1.7s after first run
 
-Use agent-browser for ergonomics (shell scripts, one-liners), not for speed.
+agent-browser is NOT consistently faster. Use it for ergonomics (shell scripts, one-liners), not for speed.
 
 ## Tool 3: Playwright test runner (E2E suites)
 
+For committed test files in `portal/e2e/`:
+
 ```bash
-npx playwright test e2e/login.spec.ts --reporter=line
+npx playwright test portal/e2e/login.spec.ts --reporter=line
 npx playwright test --ui          # interactive mode
 npx playwright show-report        # open HTML report
 ```
 
-Auth state reuse pattern:
+Auth state is stored in `portal/e2e/.auth/` — don't re-login every test:
 ```typescript
-// e2e/dev-login.setup.ts handles auth once
-// tests reuse stored state via storageState: 'e2e/.auth/user.json'
+// portal/e2e/dev-login.setup.ts handles auth once
+// tests reuse stored state via storageState: 'portal/e2e/.auth/user.json'
 ```
 
 ## Combo pattern: explore with MCP, commit with test runner
 
 ```
 Step 1 — Find the right selectors (MCP):
-  browser_navigate + browser_snapshot
+  mcp__playwright__browser_navigate + browser_snapshot
 
 Step 2 — Verify behavior interactively (MCP):
   browser_click + browser_evaluate + browser_console_messages
 
 Step 3 — Write the passing test (file):
-  e2e/<feature>.spec.ts
+  portal/e2e/<feature>.spec.ts
 
 Step 4 — Run + commit:
-  npx playwright test e2e/<feature>.spec.ts
+  npx playwright test portal/e2e/<feature>.spec.ts
+  git commit -m "test(e2e): ..."
 ```
 
 ## Anti-patterns
@@ -122,3 +128,20 @@ Step 4 — Run + commit:
 - Using `browser_take_screenshot` to "check" state → read DOM instead
 - Writing a full Playwright script file for a one-off exploration → use MCP tools
 - Using agent-browser in CI → use Playwright test runner
+- Calling `agent-browser` inside an async FastAPI route → it's a blocking subprocess
+
+## How this is verified at L5
+
+```bash
+# MCP server is registered
+claude mcp list | grep "playwright.*Connected"
+
+# agent-browser is installed
+which agent-browser && agent-browser --version
+
+# Playwright is present in portal
+ls portal/node_modules/.bin/playwright
+
+# At least one E2E spec exists
+ls portal/e2e/*.spec.ts | wc -l  # ≥ 1
+```

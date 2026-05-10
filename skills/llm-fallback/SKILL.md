@@ -1,7 +1,7 @@
 ---
 name: LLM Fallback Chain
 version: 1.0.0
-description: "Automatically chains LLM providers so when one fails or hits rate limits, the next picks up. Zero downtime for AI workflows. Use when you need resilient LLM calls across Anthropic, OpenAI, Groq, Ollama, and LM Studio."
+description: "Automatically chains LLM providers so when one fails or runs out of"
 ---
 # LLM Fallback Chain
 
@@ -32,34 +32,8 @@ python3 skills/llm-fallback/scripts/llm_fallback.py test
 python3 skills/llm-fallback/scripts/llm_fallback.py config
 ```
 
-## Configuration
-
-```bash
-LLM_CHAIN_ORDER=anthropic,openai,groq,ollama,lmstudio
-LLM_TIMEOUT_SECONDS=30
-LLM_MAX_RETRIES=2
-ANTHROPIC_API_KEY=...
-OPENAI_API_KEY=...
-GROQ_API_KEY=...
-OLLAMA_BASE_URL=http://localhost:11434
-LMSTUDIO_BASE_URL=http://localhost:1234
-```
-
 ## Events Published
 
 - `llm.provider.failed` — provider error with reason
 - `llm.fallback.activated` — switched to next provider
 - `llm.chain.exhausted` — all providers failed
-
-## Programmatic use
-
-```python
-from llm_fallback import FallbackChain
-
-chain = FallbackChain()
-response = await chain.chat(
-    messages=[{"role": "user", "content": "Hello"}],
-    task_class="summarize_short"  # optional routing hint
-)
-print(response.text, "via", response.provider)
-```

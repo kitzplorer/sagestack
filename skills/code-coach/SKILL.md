@@ -1,14 +1,16 @@
 ---
 name: Code Coach
 version: 1.0.0
-description: "Watches your code changes, identifies improvement areas, and pushes notifications to help you grow as a developer. Analyzes code patterns, security issues, naming, DRY violations, and git hygiene. Use when the user wants to watch a project for improvement opportunities, review a file, or get a daily learning tip."
+description: "Watches your code changes, identifies improvement areas, and pushes"
 ---
 # Code Coach
 
-Watches your code changes, identifies improvement areas, and delivers
-actionable tips. Like a senior dev looking over your shoulder — but less awkward.
+Watches your code changes, identifies improvement areas, and pushes
+notifications to help you grow as a developer. Like a senior dev
+looking over your shoulder — but less awkward.
 
-Sends tips via macOS notifications or webhook (Slack/Discord/custom).
+Sends actionable tips, links to short reads, and pattern improvements
+via macOS notifications or webhook (WhatsApp/Slack/Discord).
 
 ## Usage
 
@@ -37,18 +39,11 @@ python3 skills/code-coach/scripts/code_coach.py config
 - Git patterns (commit sizes, branch hygiene)
 - Sends relevant short reads (2-5 min articles) for each area
 
-## Configuration
-
-Set your notification channel in config:
-
-```bash
-COACH_NOTIFY_CHANNEL=slack   # or: macos, discord, webhook
-COACH_WEBHOOK_URL=https://hooks.slack.com/services/...
-COACH_WATCH_EXTENSIONS=.py,.ts,.tsx,.js,.go,.rs
-COACH_MIN_SEVERITY=medium    # low, medium, high
-```
-
 ## Events Published
 
 - `coach.tip.sent` — improvement tip delivered
-- `coach.pattern.detected` — code pattern found with fix suggestion
+- `coach.pattern.detected` — code pattern found
+
+## How this is verified at L5
+
+The skill invokes code analysis via `scripts/code_coach.py` which calls the sagent LLM router (ctx_route task_class=summarize_short) to generate coaching tips. L1: skill file exists with CLI entry points (watch, review, tip, stats). L3: invocation produces real coaching feedback and macOS/webhook notifications, not stubs. L5: matches sagent code-review patterns (pattern detection, security checks, DRY violations) and integrates with sagent event bus for telemetry; no external coaching peer applies.

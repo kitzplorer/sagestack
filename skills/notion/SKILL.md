@@ -1,7 +1,7 @@
 ---
 version: 1.0.0
 name: notion
-description: Notion API for creating and managing pages, databases, and blocks. Use when the user wants to read, create, update, or query Notion pages and databases via the REST API. Requires NOTION_API_KEY.
+description: Notion API for creating and managing pages, databases, and blocks.
 homepage: https://developers.notion.com
 metadata:
   {
@@ -158,10 +158,12 @@ Common property formats for database items:
 ## Key Differences in 2025-09-03
 
 - **Databases → Data Sources:** Use `/data_sources/` endpoints for queries and retrieval
-- **Two IDs:** Each database has both a `database_id` and a `data_source_id`
+- **Two IDs:** Each database now has both a `database_id` and a `data_source_id`
   - Use `database_id` when creating pages (`parent: {"database_id": "..."}`)
   - Use `data_source_id` when querying (`POST /v1/data_sources/{id}/query`)
 - **Search results:** Databases return as `"object": "data_source"` with their `data_source_id`
+- **Parent in responses:** Pages show `parent.data_source_id` alongside `parent.database_id`
+- **Finding the data_source_id:** Search for the database, or call `GET /v1/data_sources/{data_source_id}`
 
 ## Notes
 

@@ -1,12 +1,12 @@
 ---
 name: Auto-Handoff
 version: 1.0.0
-description: "Watches for code changes and tasks, automatically routes them to the right skill or agent. Use when the user wants to watch a directory and automatically trigger the right workflow on file save — e.g. frontend errors to Frontend Helper, package changes to dependency installer, security configs to Network Security."
+description: "Watches for code changes and tasks, automatically routes them to the right"
 ---
 # Auto-Handoff
 
-Watches a directory for file changes (save events), analyzes what changed,
-and routes to the appropriate skill automatically.
+Watches for code changes and tasks, automatically routes them to the right
+bot/skill. Even small pieces of work get handed off immediately.
 
 ## How It Works
 
@@ -34,23 +34,6 @@ python3 skills/auto-handoff/scripts/auto_handoff.py rules
 
 # Status of running handoffs
 python3 skills/auto-handoff/scripts/auto_handoff.py status
-```
-
-## Routing Rules (customizable)
-
-```yaml
-rules:
-  - match: "*.tsx,*.jsx,*.css"
-    skill: frontend-helper
-  - match: "*.yml,*.yaml"
-    skill: auto-architect
-    condition: "path contains 'architecture'"
-  - match: "package.json,requirements.txt,Cargo.toml"
-    skill: software-advisor
-  - match: "*.py,*.ts,*.go,*.rs"
-    skill: code-coach
-  - match: "nginx.conf,sshd_config,firewall*"
-    skill: network-security
 ```
 
 ## Events Published

@@ -6,7 +6,7 @@
 #  Configures Claude Code, Claude Desktop, Cursor, Windsurf, Zed, and shell.
 #
 #  Usage:
-#    curl -fsSL https://raw.githubusercontent.com/ORG_PLACEHOLDER/sagestack/main/scripts/sagestack-install.sh | bash
+#    curl -fsSL https://raw.githubusercontent.com/kitzplorer/sagent/main/scripts/sagestack-install.sh | bash
 #    bash sagestack-install.sh --dry-run
 #    bash sagestack-install.sh --backend http://my-sagent:8042
 #
@@ -21,7 +21,7 @@ SAGESTACK_VERSION="0.1.0"
 SAGESTACK_DIR="${HOME}/.sagestack"
 SAGESTACK_HOOKS_DIR="${SAGESTACK_DIR}/hooks"
 SAGESTACK_MCP_DIR="${SAGESTACK_DIR}/mcp"
-SAGESTACK_REPO="${SAGESTACK_REPO:-https://github.com/ORG_PLACEHOLDER/sagestack}"
+SAGESTACK_REPO="${SAGESTACK_REPO:-https://github.com/kitzplorer/sagent}"
 SAGENT_BACKEND="${SAGENT_BACKEND:-http://localhost:8042}"
 DRY_RUN=0
 HARNESS_GUARD_PATH="${SAGESTACK_HOOKS_DIR}/harness_guard.sh"
@@ -301,7 +301,7 @@ import (
 func main() {
 	// Exit 0 to not block tool calls until the real binary is deployed
 	fmt.Fprintln(os.Stderr, "[harness_guard] stub — replace with full binary from "+
-		"https://github.com/ORG_PLACEHOLDER/sagestack/releases")
+		"https://github.com/kitzplorer/sagent/releases")
 	os.Exit(0)
 }
 GOEOF

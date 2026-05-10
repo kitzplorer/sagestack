@@ -1,11 +1,11 @@
 ---
 name: Local LLM Connector
 version: 1.0.0
-description: "Connect to self-hosted open-source LLMs running locally. Supports Ollama, LM Studio, LocalAI, and any OpenAI-compatible local server. Use for free code generation with models like CodeLlama, DeepSeek, Qwen — or for offline/air-gapped operation."
+description: "Connect to self-hosted open-source LLMs running on your Mac."
 ---
 # Local LLM Connector
 
-Connect to self-hosted open-source LLMs running on your machine.
+Connect to self-hosted open-source LLMs running on your Mac.
 Supports Ollama, LM Studio, and any OpenAI-compatible local server.
 
 Free code generation with quality models like CodeLlama, DeepSeek, Qwen.
@@ -40,7 +40,7 @@ python3 skills/local-llm-connector/scripts/local_llm.py serve --port 8877
 - **Ollama** — `http://localhost:11434` (recommended, easiest setup)
 - **LM Studio** — `http://localhost:1234`
 - **LocalAI** — `http://localhost:8080`
-- **Any OpenAI-compatible** — set `LOCAL_LLM_BASE_URL`
+- **Any OpenAI-compatible** — custom URL
 
 ## Recommended Models for Code
 
@@ -48,15 +48,6 @@ python3 skills/local-llm-connector/scripts/local_llm.py serve --port 8877
 - `qwen2.5-coder:7b` — fast, good quality
 - `codellama:13b` — Meta's code specialist
 - `starcoder2:7b` — code completion
-
-## Quick start with Ollama
-
-```bash
-brew install ollama
-ollama serve &
-ollama pull deepseek-coder-v2
-ollama run deepseek-coder-v2
-```
 
 ## Events Published
 
