@@ -6,7 +6,7 @@ Claude Code Stop hook — sweeps pending claims from this session and grades the
 Wire in ~/.claude/settings.json:
   "hooks": {
     "Stop": [
-      {"type": "command", "command": "python3 ~/.aistack/supervisor/hooks/on_stop.py"}
+      {"type": "command", "command": "python3 ~/.sagestack/supervisor/hooks/on_stop.py"}
     ]
   }
 
@@ -21,7 +21,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-DB_PATH = Path.home() / ".aistack" / "supervisor.db"
+DB_PATH = Path.home() / ".sagestack" / "supervisor.db"
 SUPERVISOR_DIR = Path(__file__).resolve().parents[1]
 
 # Inline minimal versions so this hook is self-contained ─────────────────────
@@ -126,7 +126,7 @@ def main() -> None:
 
     # Log summary to stderr (visible in hook debug output)
     if swept:
-        print(f"[supervisor/on_stop] swept {swept} claims → run `python3 ~/.aistack/supervisor/supervisor.py sweep` for full grades", file=sys.stderr)
+        print(f"[supervisor/on_stop] swept {swept} claims → run `python3 ~/.sagestack/supervisor/supervisor.py sweep` for full grades", file=sys.stderr)
 
 
 if __name__ == "__main__":

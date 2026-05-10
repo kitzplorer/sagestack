@@ -4,7 +4,7 @@
 Reads SAGENT_BACKEND env var (default: http://localhost:8042).
 Proxies tool calls to the backend with SQLite caching for offline resilience.
 
-Install: configured automatically by aistack-install.sh
+Install: configured automatically by sagestack-install.sh
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ import urllib.request
 from pathlib import Path
 
 BACKEND = os.environ.get("SAGENT_BACKEND", "http://localhost:8042")
-CACHE_DB = Path.home() / ".aistack" / "signals.db"
+CACHE_DB = Path.home() / ".sagestack" / "signals.db"
 TIMEOUT = 3.0
 
 
@@ -96,7 +96,7 @@ def _handle(msg: dict) -> dict:
         return {"jsonrpc": "2.0", "id": msg_id, "result": {
             "protocolVersion": "2024-11-05",
             "capabilities": {"tools": {}},
-            "serverInfo": {"name": "aistack-mcp", "version": "1.0.0"},
+            "serverInfo": {"name": "sagestack-mcp", "version": "1.0.0"},
         }}
 
     if method == "tools/list":

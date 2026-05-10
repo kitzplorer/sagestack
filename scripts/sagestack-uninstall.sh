@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════════════════
-#  aistack-uninstall.sh — remove sagent aistack managed config only
+#  sagestack-uninstall.sh — remove sagent sagestack managed config only
 #
 #  Only removes:
-#   - The managed blocks (aistack-managed-start/end) from text config files
-#   - The ~/.aistack/ directory (after explicit confirmation)
+#   - The managed blocks (sagestack-managed-start/end) from text config files
+#   - The ~/.sagestack/ directory (after explicit confirmation)
 #
 #  NEVER touches user config outside managed markers.
 #  NEVER removes any tool (claude, node, brew, etc.)
@@ -13,7 +13,7 @@ set -euo pipefail
 
 DRY_RUN=0
 NO_CONFIRM=0
-AISTACK_DIR="${HOME}/.aistack"
+SAGESTACK_DIR="${HOME}/.sagestack"
 
 B='\033[1m'; G='\033[0;32m'; Y='\033[1;33m'; R='\033[0;31m'; C='\033[0;36m'; N='\033[0m'
 hdr()  { printf "\n${B}${C}══ %s ══${N}\n" "$*"; }
@@ -39,7 +39,7 @@ done
 echo ""
 printf "${B}${C}"
 echo "╔══════════════════════════════════════════════════════════════════╗"
-echo "║        sagent aistack — uninstaller                              ║"
+echo "║        sagent sagestack — uninstaller                              ║"
 if [[ $DRY_RUN -eq 1 ]]; then
 echo "║                  *** DRY-RUN MODE ***                            ║"
 fi
@@ -48,7 +48,7 @@ printf "${N}\n"
 
 # ── Confirm ───────────────────────────────────────────────────────────────────
 if [[ $DRY_RUN -eq 0 && $NO_CONFIRM -eq 0 ]]; then
-  printf "${Y}This will remove all aistack managed config blocks and the ~/.aistack/ directory.${N}\n"
+  printf "${Y}This will remove all sagestack managed config blocks and the ~/.sagestack/ directory.${N}\n"
   printf "User config outside managed markers will NOT be touched.\n\n"
   read -r -p "Continue? [y/N] " confirm
   [[ "${confirm,,}" == "y" ]] || { echo "Aborted."; exit 0; }
@@ -61,7 +61,7 @@ strip_managed_block() {
     skip "$file not found — skipped"
     return
   fi
-  if ! grep -qF "# aistack-managed-start" "$file" 2>/dev/null; then
+  if ! grep -qF "# sagestack-managed-start" "$file" 2>/dev/null; then
     skip "$file — no managed block found"
     return
   fi
@@ -75,8 +75,8 @@ strip_managed_block() {
 import sys, pathlib, os
 
 path = pathlib.Path(sys.argv[1])
-start = "# aistack-managed-start"
-end   = "# aistack-managed-end"
+start = "# sagestack-managed-start"
+end   = "# sagestack-managed-end"
 
 lines = path.read_text().splitlines(keepends=True)
 out, inside = [], False
@@ -95,7 +95,7 @@ while out and out[-1].strip() == "":
 if out:
     out.append("\n")
 
-tmp = str(path) + ".aistack.tmp"
+tmp = str(path) + ".sagestack.tmp"
 pathlib.Path(tmp).write_text("".join(out))
 os.replace(tmp, str(path))
 print(f"  stripped managed block from {path}")
@@ -146,7 +146,7 @@ else:
     print(f"  [skip] key '{'.'.join(key_path)}' not present")
     sys.exit(0)
 
-tmp = str(file_path) + ".aistack.tmp"
+tmp = str(file_path) + ".sagestack.tmp"
 with open(tmp, "w") as f:
     json.dump(data, f, indent=2)
     f.write("\n")
@@ -164,11 +164,11 @@ remove_claude_hook() {
   fi
 
   if [[ $DRY_RUN -eq 1 ]]; then
-    dry "Would remove aistack PreToolUse hook from $file"
+    dry "Would remove sagestack PreToolUse hook from $file"
     return
   fi
 
-  python3 - "$file" "${AISTACK_DIR}/hooks/harness_guard.sh" <<'PYEOF'
+  python3 - "$file" "${SAGESTACK_DIR}/hooks/harness_guard.sh" <<'PYEOF'
 import sys, json, os, pathlib
 
 file_path    = pathlib.Path(sys.argv[1])
@@ -190,7 +190,7 @@ pre_tool_use[:] = [
 after = len(pre_tool_use)
 
 if before == after:
-    print("  [skip] aistack hook entry not found in PreToolUse")
+    print("  [skip] sagestack hook entry not found in PreToolUse")
     sys.exit(0)
 
 hooks["PreToolUse"] = pre_tool_use
@@ -199,14 +199,14 @@ if not pre_tool_use:
 if not hooks:
     del data["hooks"]
 
-tmp = str(file_path) + ".aistack.tmp"
+tmp = str(file_path) + ".sagestack.tmp"
 with open(tmp, "w") as f:
     json.dump(data, f, indent=2)
     f.write("\n")
 os.replace(tmp, str(file_path))
-print(f"  removed aistack PreToolUse hook from {file_path}")
+print(f"  removed sagestack PreToolUse hook from {file_path}")
 PYEOF
-  ok "Removed aistack hook from ~/.claude/settings.json"
+  ok "Removed sagestack hook from ~/.claude/settings.json"
 }
 
 # ── 1: Text config files — strip managed blocks ───────────────────────────────
@@ -248,19 +248,19 @@ remove_json_key "${HOME}/.cursor/mcp.json" "mcpServers.sagent" || true
 # Zed
 remove_json_key "${HOME}/.config/zed/settings.json" "assistant.mcp_servers.sagent" || true
 
-# ── 3: Remove ~/.aistack/ directory ──────────────────────────────────────────
-hdr "Removing ~/.aistack/ directory"
+# ── 3: Remove ~/.sagestack/ directory ──────────────────────────────────────────
+hdr "Removing ~/.sagestack/ directory"
 
-if [[ -d "$AISTACK_DIR" ]]; then
+if [[ -d "$SAGESTACK_DIR" ]]; then
   if [[ $DRY_RUN -eq 1 ]]; then
-    dry "Would remove $AISTACK_DIR"
+    dry "Would remove $SAGESTACK_DIR"
   else
-    step "Removing $AISTACK_DIR..."
-    rm -rf "$AISTACK_DIR"
-    ok "Removed $AISTACK_DIR"
+    step "Removing $SAGESTACK_DIR..."
+    rm -rf "$SAGESTACK_DIR"
+    ok "Removed $SAGESTACK_DIR"
   fi
 else
-  skip "$AISTACK_DIR not found — already clean"
+  skip "$SAGESTACK_DIR not found — already clean"
 fi
 
 # ── Summary ───────────────────────────────────────────────────────────────────
@@ -268,5 +268,5 @@ echo ""
 if [[ $DRY_RUN -eq 1 ]]; then
   printf "${Y}Dry-run complete — nothing was modified.${N}\n\n"
 else
-  printf "${G}aistack uninstalled. Your tools and user config are untouched.${N}\n\n"
+  printf "${G}sagestack uninstalled. Your tools and user config are untouched.${N}\n\n"
 fi

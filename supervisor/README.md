@@ -1,4 +1,4 @@
-# ~/.aistack/supervisor — Standalone Verification Harness
+# ~/.sagestack/supervisor — Standalone Verification Harness
 
 Portable AI-stack supervisor. Runs on any machine with Python 3.10+.  
 No FastAPI, no sagent imports, no pip dependencies beyond stdlib.
@@ -8,9 +8,9 @@ No FastAPI, no sagent imports, no pip dependencies beyond stdlib.
 ## Install
 
 ```bash
-# Already at ~/.aistack/supervisor/ — nothing to pip-install.
+# Already at ~/.sagestack/supervisor/ — nothing to pip-install.
 # Make the CLI executable:
-chmod +x ~/.aistack/supervisor/supervisor.py
+chmod +x ~/.sagestack/supervisor/supervisor.py
 ```
 
 ---
@@ -19,22 +19,22 @@ chmod +x ~/.aistack/supervisor/supervisor.py
 
 ```bash
 # Show open claims, tier distribution, LLM tier
-python3 ~/.aistack/supervisor/supervisor.py status
+python3 ~/.sagestack/supervisor/supervisor.py status
 
 # Re-evaluate all open claims (file-level collectors)
-python3 ~/.aistack/supervisor/supervisor.py sweep
+python3 ~/.sagestack/supervisor/supervisor.py sweep
 
 # Add LLM eval during sweep
-python3 ~/.aistack/supervisor/supervisor.py sweep --llm
+python3 ~/.sagestack/supervisor/supervisor.py sweep --llm
 
 # Verify claims for one file
-python3 ~/.aistack/supervisor/supervisor.py verify --target path/to/file.py
+python3 ~/.sagestack/supervisor/supervisor.py verify --target path/to/file.py
 
 # List blocking claims only
-python3 ~/.aistack/supervisor/supervisor.py blocked
+python3 ~/.sagestack/supervisor/supervisor.py blocked
 
 # Add a claim manually
-python3 ~/.aistack/supervisor/supervisor.py add --text "implement auth gate" --file services/auth.py --type security
+python3 ~/.sagestack/supervisor/supervisor.py add --text "implement auth gate" --file services/auth.py --type security
 ```
 
 ---
@@ -63,13 +63,13 @@ Add to `~/.claude/settings.json`:
     "UserPromptSubmit": [
       {
         "type": "command",
-        "command": "python3 /Users/YOU/.aistack/supervisor/hooks/on_user_prompt_submit.py"
+        "command": "python3 /Users/YOU/.sagestack/supervisor/hooks/on_user_prompt_submit.py"
       }
     ],
     "Stop": [
       {
         "type": "command",
-        "command": "python3 /Users/YOU/.aistack/supervisor/hooks/on_stop.py"
+        "command": "python3 /Users/YOU/.sagestack/supervisor/hooks/on_stop.py"
       }
     ]
   }
@@ -92,7 +92,7 @@ Replace `YOU` with your username. The hooks are fail-open — they never block C
 
 ## DB Schema
 
-SQLite at `~/.aistack/supervisor.db`:
+SQLite at `~/.sagestack/supervisor.db`:
 
 ```sql
 claims(id, file_path, claim_type, claim_text, tier, status, evidence_json, created_at, updated_at)
@@ -105,7 +105,7 @@ Status values: `open` | `closed` | `blocked`
 ## Files
 
 ```
-~/.aistack/supervisor/
+~/.sagestack/supervisor/
   supervisor.py          CLI entrypoint
   ledger.py              SQLite claim store
   collector.py           Evidence collectors (file_exists, grep_symbol, git_log_count, test_pass)

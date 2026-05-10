@@ -1,31 +1,31 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════════════════
-#  aistack-install.sh — Phase 3 universal aistack installer
+#  sagestack-install.sh — Phase 3 universal sagestack installer
 #
-#  Installs the sagent aistack on any macOS 12+ or Ubuntu 22+ machine.
+#  Installs the sagent sagestack on any macOS 12+ or Ubuntu 22+ machine.
 #  Configures Claude Code, Claude Desktop, Cursor, Windsurf, Zed, and shell.
 #
 #  Usage:
-#    curl -fsSL https://raw.githubusercontent.com/ORG_PLACEHOLDER/aistack/main/scripts/aistack-install.sh | bash
-#    bash aistack-install.sh --dry-run
-#    bash aistack-install.sh --backend http://my-sagent:8042
+#    curl -fsSL https://raw.githubusercontent.com/ORG_PLACEHOLDER/sagestack/main/scripts/sagestack-install.sh | bash
+#    bash sagestack-install.sh --dry-run
+#    bash sagestack-install.sh --backend http://my-sagent:8042
 #
 #  Idempotent: re-running is safe — already-done steps are skipped.
-#  Managed blocks: `# aistack-managed-start` / `# aistack-managed-end` markers
+#  Managed blocks: `# sagestack-managed-start` / `# sagestack-managed-end` markers
 #  allow re-runs to update only the managed section of any file.
 # ═══════════════════════════════════════════════════════════════════════════
 set -euo pipefail
 
 # ── Globals ────────────────────────────────────────────────────────────────
-AISTACK_VERSION="0.1.0"
-AISTACK_DIR="${HOME}/.aistack"
-AISTACK_HOOKS_DIR="${AISTACK_DIR}/hooks"
-AISTACK_MCP_DIR="${AISTACK_DIR}/mcp"
-AISTACK_REPO="${AISTACK_REPO:-https://github.com/ORG_PLACEHOLDER/aistack}"
+SAGESTACK_VERSION="0.1.0"
+SAGESTACK_DIR="${HOME}/.sagestack"
+SAGESTACK_HOOKS_DIR="${SAGESTACK_DIR}/hooks"
+SAGESTACK_MCP_DIR="${SAGESTACK_DIR}/mcp"
+SAGESTACK_REPO="${SAGESTACK_REPO:-https://github.com/ORG_PLACEHOLDER/sagestack}"
 SAGENT_BACKEND="${SAGENT_BACKEND:-http://localhost:8042}"
 DRY_RUN=0
-HARNESS_GUARD_PATH="${AISTACK_HOOKS_DIR}/harness_guard.sh"
-MCP_SCRIPT_PATH="${AISTACK_MCP_DIR}/sagent-mcp.py"
+HARNESS_GUARD_PATH="${SAGESTACK_HOOKS_DIR}/harness_guard.sh"
+MCP_SCRIPT_PATH="${SAGESTACK_MCP_DIR}/sagent-mcp.py"
 
 # ── Colours ────────────────────────────────────────────────────────────────
 B='\033[1m'; G='\033[0;32m'; Y='\033[1;33m'; R='\033[0;31m'; C='\033[0;36m'; N='\033[0m'
@@ -41,7 +41,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run)   DRY_RUN=1; shift ;;
     --backend)   SAGENT_BACKEND="$2"; shift 2 ;;
-    --repo)      AISTACK_REPO="$2"; shift 2 ;;
+    --repo)      SAGESTACK_REPO="$2"; shift 2 ;;
     -h|--help)
       echo "Usage: $0 [--dry-run] [--backend URL] [--repo URL]"
       exit 0 ;;
@@ -68,7 +68,7 @@ atomic_write() {
     dry "Would write $(echo "$content" | wc -l | tr -d ' ') lines → $dest"
     return
   fi
-  local tmp="${dest}.aistack.tmp"
+  local tmp="${dest}.sagestack.tmp"
   printf '%s' "$content" > "$tmp"
   mv "$tmp" "$dest"
 }
@@ -84,12 +84,12 @@ upsert_managed_block() {
     return
   fi
 
-  local start_marker="# aistack-managed-start"
-  local end_marker="# aistack-managed-end"
+  local start_marker="# sagestack-managed-start"
+  local end_marker="# sagestack-managed-end"
 
   if grep -qF "$start_marker" "$file" 2>/dev/null; then
     # Remove existing managed block then re-append
-    local tmp="${file}.aistack.tmp"
+    local tmp="${file}.sagestack.tmp"
     python3 - "$file" "$start_marker" "$end_marker" <<'PYEOF'
 import sys, pathlib
 path, start, end = sys.argv[1], sys.argv[2], sys.argv[3]
@@ -102,9 +102,9 @@ for line in lines:
         inside = False
     elif not inside:
         out.append(line)
-pathlib.Path(path + ".aistack.tmp").write_text("".join(out))
+pathlib.Path(path + ".sagestack.tmp").write_text("".join(out))
 PYEOF
-    mv "${file}.aistack.tmp" "$file"
+    mv "${file}.sagestack.tmp" "$file"
   fi
 
   printf '\n%s\n%s\n%s\n' "$start_marker" "$block" "$end_marker" >> "$file"
@@ -144,7 +144,7 @@ def deep_merge(target, source):
 
 merged = deep_merge(copy.deepcopy(base), patch)
 
-tmp = str(file_path) + ".aistack.tmp"
+tmp = str(file_path) + ".sagestack.tmp"
 with open(tmp, "w") as f:
     json.dump(merged, f, indent=2)
     f.write("\n")
@@ -159,7 +159,7 @@ PYEOF
 echo ""
 printf "${B}${C}"
 echo "╔══════════════════════════════════════════════════════════════════╗"
-echo "║        sagent aistack installer  v${AISTACK_VERSION}                      ║"
+echo "║        sagent sagestack installer  v${SAGESTACK_VERSION}                      ║"
 if [[ $DRY_RUN -eq 1 ]]; then
 echo "║                  *** DRY-RUN MODE ***                            ║"
 fi
@@ -270,27 +270,27 @@ fi
 # ── Step 5: Download claude-code-harness binary ─────────────────────────────
 hdr "5/10  claude-code-harness binary"
 
-HARNESS_BIN="${AISTACK_DIR}/bin/harness_guard"
+HARNESS_BIN="${SAGESTACK_DIR}/bin/harness_guard"
 if [[ $DRY_RUN -eq 0 ]]; then
-  mkdir -p "${AISTACK_DIR}/bin"
+  mkdir -p "${SAGESTACK_DIR}/bin"
 fi
 
 if [[ -f "$HARNESS_BIN" ]]; then
   skip "harness_guard binary already present at $HARNESS_BIN"
 else
   # Try GitHub releases first
-  HARNESS_RELEASE_URL="${AISTACK_REPO}/releases/latest/download/harness_guard-${OS}-${ARCH}"
+  HARNESS_RELEASE_URL="${SAGESTACK_REPO}/releases/latest/download/harness_guard-${OS}-${ARCH}"
   step "Attempting download from GitHub releases..."
   if run "curl -fsSL -o '${HARNESS_BIN}.tmp' '${HARNESS_RELEASE_URL}' && mv '${HARNESS_BIN}.tmp' '${HARNESS_BIN}' && chmod +x '${HARNESS_BIN}'" 2>/dev/null; then
     ok "harness_guard downloaded from releases"
   elif [[ $HAS_GO -eq 1 ]]; then
     step "Binary not found in releases — building from source with go..."
-    HARNESS_SRC="${AISTACK_DIR}/src/harness_guard"
+    HARNESS_SRC="${SAGESTACK_DIR}/src/harness_guard"
     if [[ $DRY_RUN -eq 0 ]]; then mkdir -p "$HARNESS_SRC"; fi
     # Write a minimal harness guard in Go if no source exists yet
     if [[ ! -f "${HARNESS_SRC}/main.go" && $DRY_RUN -eq 0 ]]; then
       cat > "${HARNESS_SRC}/main.go" <<'GOEOF'
-// harness_guard — minimal stub. Replace with full source from aistack repo.
+// harness_guard — minimal stub. Replace with full source from sagestack repo.
 package main
 
 import (
@@ -301,7 +301,7 @@ import (
 func main() {
 	// Exit 0 to not block tool calls until the real binary is deployed
 	fmt.Fprintln(os.Stderr, "[harness_guard] stub — replace with full binary from "+
-		"https://github.com/ORG_PLACEHOLDER/aistack/releases")
+		"https://github.com/ORG_PLACEHOLDER/sagestack/releases")
 	os.Exit(0)
 }
 GOEOF
@@ -315,22 +315,22 @@ GOEOF
 fi
 
 # ── Step 6: Deploy hooks ─────────────────────────────────────────────────────
-hdr "6/10  Deploying aistack hooks"
+hdr "6/10  Deploying sagestack hooks"
 
 if [[ $DRY_RUN -eq 0 ]]; then
-  mkdir -p "$AISTACK_HOOKS_DIR"
+  mkdir -p "$SAGESTACK_HOOKS_DIR"
 fi
 
 # Write harness_guard.sh shell fallback
 HARNESS_SH_CONTENT='#!/usr/bin/env bash
-# harness_guard.sh — sagent aistack pre-tool-use hook (shell fallback)
+# harness_guard.sh — sagent sagestack pre-tool-use hook (shell fallback)
 # Delegates to binary if available, else exits 0 (fail-open).
-BINARY="${HOME}/.aistack/bin/harness_guard"
+BINARY="${HOME}/.sagestack/bin/harness_guard"
 if [[ -x "$BINARY" ]]; then
   exec "$BINARY" "$@"
 fi
 # Shell fallback: log the tool call and exit 0 (do not block)
-LOGFILE="${HOME}/.aistack/harness.log"
+LOGFILE="${HOME}/.sagestack/harness.log"
 echo "$(date -Iseconds) tool_call tool=${TOOL_NAME:-unknown}" >> "$LOGFILE" 2>/dev/null || true
 exit 0
 '
@@ -347,7 +347,7 @@ fi
 hdr "7/10  Deploying sagent-mcp.py"
 
 if [[ $DRY_RUN -eq 0 ]]; then
-  mkdir -p "$AISTACK_MCP_DIR"
+  mkdir -p "$SAGESTACK_MCP_DIR"
 fi
 
 MCP_CONTENT='#!/usr/bin/env python3
@@ -465,7 +465,7 @@ else:
     print("  sagent MCP server already present — skipped")
 
 # Atomic write
-tmp = settings_path + ".aistack.tmp"
+tmp = settings_path + ".sagestack.tmp"
 with open(tmp, "w") as f:
     json.dump(settings, f, indent=2)
     f.write("\n")
@@ -566,7 +566,7 @@ if [[ $HAS_WINDSURF -eq 1 ]]; then
 mcp_server sagent python3 ${MCP_SCRIPT_PATH}
 env SAGENT_BACKEND=${SAGENT_BACKEND}"
 
-  if [[ -f "$WINDSURF_RULES" ]] && grep -qF "aistack-managed-start" "$WINDSURF_RULES" 2>/dev/null; then
+  if [[ -f "$WINDSURF_RULES" ]] && grep -qF "sagestack-managed-start" "$WINDSURF_RULES" 2>/dev/null; then
     skip "Windsurf rules managed block already present"
   else
     upsert_managed_block "$WINDSURF_RULES" "$WINDSURF_BLOCK"
@@ -613,11 +613,11 @@ configure_shell() {
   local rc_file="$1"
   if [[ ! -f "$rc_file" && $DRY_RUN -eq 0 ]]; then touch "$rc_file"; fi
 
-  local shell_block="export AISTACK_DIR=\"\${HOME}/.aistack\"
-export PATH=\"\${AISTACK_DIR}/bin:\${PATH}\"
+  local shell_block="export SAGESTACK_DIR=\"\${HOME}/.sagestack\"
+export PATH=\"\${SAGESTACK_DIR}/bin:\${PATH}\"
 export SAGENT_BACKEND=\"${SAGENT_BACKEND}\""
 
-  if grep -qF "aistack-managed-start" "$rc_file" 2>/dev/null; then
+  if grep -qF "sagestack-managed-start" "$rc_file" 2>/dev/null; then
     skip "Shell managed block already in $rc_file — updating..."
   fi
   upsert_managed_block "$rc_file" "$shell_block"
@@ -638,16 +638,16 @@ else
   skip "Shell not detected (not zsh or bash) — skipping shell config"
 fi
 
-# ── Step 9: Initialize ~/.aistack/ structure ──────────────────────────────────
-hdr "9/10  Initializing ~/.aistack/ directory structure"
+# ── Step 9: Initialize ~/.sagestack/ structure ──────────────────────────────────
+hdr "9/10  Initializing ~/.sagestack/ directory structure"
 
 if [[ $DRY_RUN -eq 0 ]]; then
-  mkdir -p "${AISTACK_DIR}/bin" "${AISTACK_DIR}/hooks" "${AISTACK_DIR}/mcp" \
-            "${AISTACK_DIR}/logs" "${AISTACK_DIR}/data"
+  mkdir -p "${SAGESTACK_DIR}/bin" "${SAGESTACK_DIR}/hooks" "${SAGESTACK_DIR}/mcp" \
+            "${SAGESTACK_DIR}/logs" "${SAGESTACK_DIR}/data"
 fi
 
 # signals.db stub (SQLite)
-SIGNALS_DB="${AISTACK_DIR}/data/signals.db"
+SIGNALS_DB="${SAGESTACK_DIR}/data/signals.db"
 if [[ ! -f "$SIGNALS_DB" ]]; then
   if [[ $DRY_RUN -eq 0 ]]; then
     python3 -c "
@@ -673,12 +673,12 @@ else
 fi
 
 # context.json stub
-CONTEXT_JSON="${AISTACK_DIR}/context.json"
+CONTEXT_JSON="${SAGESTACK_DIR}/context.json"
 if [[ ! -f "$CONTEXT_JSON" ]]; then
   CONTEXT_CONTENT=$(python3 -c "
 import json, datetime
 print(json.dumps({
-  'version': '${AISTACK_VERSION}',
+  'version': '${SAGESTACK_VERSION}',
   'installed_at': datetime.datetime.utcnow().isoformat() + 'Z',
   'backend': '${SAGENT_BACKEND}',
   'os': '${OS}',
@@ -692,13 +692,13 @@ else
 fi
 
 # Version file
-VERSION_CONTENT="AISTACK_VERSION=${AISTACK_VERSION}
+VERSION_CONTENT="SAGESTACK_VERSION=${SAGESTACK_VERSION}
 INSTALLED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 OS=${OS}
 ARCH=${ARCH}
 SAGENT_BACKEND=${SAGENT_BACKEND}
 "
-atomic_write "${AISTACK_DIR}/.version" "$VERSION_CONTENT"
+atomic_write "${SAGESTACK_DIR}/.version" "$VERSION_CONTENT"
 ok ".version written"
 
 # ── Step 10: Summary ─────────────────────────────────────────────────────────
@@ -706,7 +706,7 @@ hdr "10/10  Installation summary"
 
 echo ""
 printf "${B}Installed:${N}\n"
-printf "  ${G}~/.aistack/${N}                     aistack home directory\n"
+printf "  ${G}~/.sagestack/${N}                     sagestack home directory\n"
 printf "  ${G}%s${N}  MCP bridge\n" "$MCP_SCRIPT_PATH"
 printf "  ${G}%s${N}  pre-tool hook\n" "$HARNESS_GUARD_PATH"
 
@@ -722,13 +722,13 @@ printf "${B}Configured:${N}\n"
 echo ""
 printf "${B}Next steps:${N}\n"
 printf "  1. Reload your shell:  ${C}source %s${N}\n" "${SHELL_RC:-~/.zshrc}"
-printf "  2. Verify:             ${C}cat ~/.aistack/.version${N}\n"
+printf "  2. Verify:             ${C}cat ~/.sagestack/.version${N}\n"
 printf "  3. Start backend:      ${C}cd ~/projects/sagent/services && python3 -m uvicorn code_agent.server:app --host 0.0.0.0 --port 8042${N}\n"
-printf "  4. Uninstall:          ${C}bash aistack-uninstall.sh${N}\n"
+printf "  4. Uninstall:          ${C}bash sagestack-uninstall.sh${N}\n"
 echo ""
 
 if [[ $DRY_RUN -eq 1 ]]; then
   printf "${Y}Dry-run complete — no files were modified.${N}\n\n"
 else
-  printf "${G}aistack v${AISTACK_VERSION} installed successfully.${N}\n\n"
+  printf "${G}sagestack v${SAGESTACK_VERSION} installed successfully.${N}\n\n"
 fi

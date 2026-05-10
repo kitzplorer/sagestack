@@ -11,7 +11,7 @@
   },
   "supervisor": {
     "enabled": true,
-    "db_path": "~/.aistack/supervisor.db",
+    "db_path": "~/.sagestack/supervisor.db",
     "grader_model": "claude-haiku-4-5"
   },
   "memory_agent": {

@@ -6,7 +6,7 @@ Claude Code UserPromptSubmit hook — logs incoming prompt as a pending claim.
 Wire in ~/.claude/settings.json:
   "hooks": {
     "UserPromptSubmit": [
-      {"type": "command", "command": "python3 ~/.aistack/supervisor/hooks/on_user_prompt_submit.py"}
+      {"type": "command", "command": "python3 ~/.sagestack/supervisor/hooks/on_user_prompt_submit.py"}
     ]
   }
 
@@ -19,7 +19,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-DB_PATH = Path.home() / ".aistack" / "supervisor.db"
+DB_PATH = Path.home() / ".sagestack" / "supervisor.db"
 DDL = """
 CREATE TABLE IF NOT EXISTS claims (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -1,6 +1,6 @@
 """
-ledger.py — SQLite claim store for ~/.aistack/supervisor/
-DB: ~/.aistack/supervisor.db
+ledger.py — SQLite claim store for ~/.sagestack/supervisor/
+DB: ~/.sagestack/supervisor.db
 Pure stdlib only: sqlite3, pathlib, json, datetime
 """
 import json
@@ -8,7 +8,7 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
-DB_PATH = Path.home() / ".aistack" / "supervisor.db"
+DB_PATH = Path.home() / ".sagestack" / "supervisor.db"
 
 DDL = """
 CREATE TABLE IF NOT EXISTS claims (

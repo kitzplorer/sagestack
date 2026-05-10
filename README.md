@@ -1,4 +1,4 @@
-# aistack
+# sagestack
 
 One-command AI coding stack — supervisor, bar raiser, skills, and cross-IDE MCP wiring.
 
@@ -17,20 +17,20 @@ Works on any macOS 12+ or Ubuntu 22+ machine. No cloud account required beyond y
 ## Install (macOS / Linux)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/[org]/aistack/main/scripts/aistack-install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/[org]/sagestack/main/scripts/sagestack-install.sh | bash
 ```
 
 ## Install (Windows — native or WSL2)
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\scripts\aistack-install.ps1
+.\scripts\sagestack-install.ps1
 ```
 
 ## What gets installed
 
 ```
-~/.aistack/
+~/.sagestack/
   hooks/           # bar_raiser.py, supervisor hooks
   supervisor/      # standalone L1-L5 claim verifier
   skills/          # 20 general-purpose slash commands
@@ -43,18 +43,18 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ## Dry run
 
 ```bash
-bash scripts/aistack-install.sh --dry-run
+bash scripts/sagestack-install.sh --dry-run
 ```
 
 ## Uninstall
 
 ```bash
-bash scripts/aistack-uninstall.sh
+bash scripts/sagestack-uninstall.sh
 ```
 
 ## Configuration
 
-Copy `templates/aistack.config.example.json` to `~/.aistack/config.json` and set:
+Copy `templates/sagestack.config.example.json` to `~/.sagestack/config.json` and set:
 
 ```json
 {
@@ -77,23 +77,23 @@ LLM chain: your sagent backend → Anthropic API → Ollama → fail-open.
 ## Supervisor CLI
 
 ```bash
-python3 ~/.aistack/supervisor/supervisor.py status
-python3 ~/.aistack/supervisor/supervisor.py sweep
-python3 ~/.aistack/supervisor/supervisor.py verify --target path/to/file.py
-python3 ~/.aistack/supervisor/supervisor.py blocked
+python3 ~/.sagestack/supervisor/supervisor.py status
+python3 ~/.sagestack/supervisor/supervisor.py sweep
+python3 ~/.sagestack/supervisor/supervisor.py verify --target path/to/file.py
+python3 ~/.sagestack/supervisor/supervisor.py blocked
 ```
 
 ## Memory agent
 
 ```bash
 # Auto-run (wired via Stop hook):
-python3 ~/.aistack/memory_agent.py
+python3 ~/.sagestack/memory_agent.py
 
 # Manual after Cursor session:
-python3 ~/.aistack/memory_agent.py --llm "Cursor" --summary "fixed auth bug, added tests"
+python3 ~/.sagestack/memory_agent.py --llm "Cursor" --summary "fixed auth bug, added tests"
 
 # Init a new project:
-python3 ~/.aistack/memory_agent.py --init --project /path/to/repo
+python3 ~/.sagestack/memory_agent.py --init --project /path/to/repo
 ```
 
 ## License

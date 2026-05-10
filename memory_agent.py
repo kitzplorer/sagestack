@@ -50,7 +50,7 @@ def _find_context_file(project_root: Path) -> Path:
     candidates = [
         project_root / "services" / "code_agent" / "CONTEXT.md",
         project_root / "CONTEXT.md",
-        Path.home() / ".aistack" / "CONTEXT.md",
+        Path.home() / ".sagestack" / "CONTEXT.md",
     ]
     for c in candidates:
         if c.exists():

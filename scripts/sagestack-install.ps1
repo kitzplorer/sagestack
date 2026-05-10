@@ -1,13 +1,13 @@
 # ═══════════════════════════════════════════════════════════════════════════
-#  aistack-install.ps1 — Windows installer stub for sagent aistack
+#  sagestack-install.ps1 — Windows installer stub for sagent sagestack
 #
 #  Requires: PowerShell 5.1+ or PowerShell Core 7+
 #
 #  Usage:
 #    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-#    .\aistack-install.ps1
-#    .\aistack-install.ps1 -DryRun
-#    .\aistack-install.ps1 -Backend "http://my-sagent:8042"
+#    .\sagestack-install.ps1
+#    .\sagestack-install.ps1 -DryRun
+#    .\sagestack-install.ps1 -Backend "http://my-sagent:8042"
 # ═══════════════════════════════════════════════════════════════════════════
 param(
     [switch]$DryRun,
@@ -47,7 +47,7 @@ function Invoke-Safe {
 # ── Banner ─────────────────────────────────────────────────────────────────
 Write-Host ""
 Write-Host "╔══════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║       sagent aistack installer — Windows                         ║" -ForegroundColor Cyan
+Write-Host "║       sagent sagestack installer — Windows                         ║" -ForegroundColor Cyan
 if ($DryRun) {
     Write-Host "║                  *** DRY-RUN MODE ***                            ║" -ForegroundColor Yellow
 }
@@ -137,7 +137,7 @@ $mcpEntry = @{
     mcpServers = @{
         sagent = @{
             command = "python3"
-            args    = @("$env:USERPROFILE\.aistack\mcp\sagent-mcp.py")
+            args    = @("$env:USERPROFILE\.sagestack\mcp\sagent-mcp.py")
             env     = @{ SAGENT_BACKEND = $Backend }
         }
     }
@@ -169,7 +169,7 @@ if (Test-Path $claudeConfigDir) {
             $existing["mcpServers"]["sagent"] = $mcpEntry.mcpServers.sagent
 
             # Atomic write via temp file
-            $tmpPath = "$claudeConfigPath.aistack.tmp"
+            $tmpPath = "$claudeConfigPath.sagestack.tmp"
             $existing | ConvertTo-Json -Depth 10 | Set-Content -Path $tmpPath -Encoding UTF8
             Move-Item -Path $tmpPath -Destination $claudeConfigPath -Force
             Write-Ok "Claude Desktop configured: $claudeConfigPath"
@@ -210,11 +210,11 @@ if (Test-Path $vsCodeSettingsDir) {
             } else {
                 $vsSettings["mcp"]["servers"]["sagent"] = @{
                     command = "python3"
-                    args    = @("$env:USERPROFILE\.aistack\mcp\sagent-mcp.py")
+                    args    = @("$env:USERPROFILE\.sagestack\mcp\sagent-mcp.py")
                     env     = @{ SAGENT_BACKEND = $Backend }
                 }
 
-                $tmpPath = "$vsCodeSettingsPath.aistack.tmp"
+                $tmpPath = "$vsCodeSettingsPath.sagestack.tmp"
                 $vsSettings | ConvertTo-Json -Depth 10 | Set-Content -Path $tmpPath -Encoding UTF8
                 Move-Item -Path $tmpPath -Destination $vsCodeSettingsPath -Force
                 Write-Ok "VS Code configured: $vsCodeSettingsPath"
@@ -257,11 +257,11 @@ if ($DryRun) {
         } else {
             $cursorCfg["mcpServers"]["sagent"] = @{
                 command = "python3"
-                args    = @("$env:USERPROFILE\.aistack\mcp\sagent-mcp.py")
+                args    = @("$env:USERPROFILE\.sagestack\mcp\sagent-mcp.py")
                 env     = @{ SAGENT_BACKEND = $Backend }
             }
 
-            $tmpPath = "$cursorConfigPath.aistack.tmp"
+            $tmpPath = "$cursorConfigPath.sagestack.tmp"
             $cursorCfg | ConvertTo-Json -Depth 10 | Set-Content -Path $tmpPath -Encoding UTF8
             Move-Item -Path $tmpPath -Destination $cursorConfigPath -Force
             Write-Ok "Cursor configured: $cursorConfigPath"
@@ -269,10 +269,10 @@ if ($DryRun) {
     }
 }
 
-# ── Step 3d: Deploy Python aistack hook for Windows ────────────────────────
+# ── Step 3d: Deploy Python sagestack hook for Windows ────────────────────────
 Write-Header "6/7  Installing Windows context_writer hook"
 
-$hooksDir         = Join-Path $env:USERPROFILE ".aistack\hooks"
+$hooksDir         = Join-Path $env:USERPROFILE ".sagestack\hooks"
 $hookScript       = Join-Path $hooksDir "context_writer.py"
 $claudeSettingsDir  = Join-Path $env:USERPROFILE ".claude"
 $claudeSettingsPath = Join-Path $claudeSettingsDir "settings.json"
@@ -290,9 +290,9 @@ if ($DryRun) {
         $hookContent = @'
 #!/usr/bin/env python3
 """
-aistack context_writer hook (Windows native)
+sagestack context_writer hook (Windows native)
 Reads Claude Code UserPromptSubmit JSON from stdin,
-writes %USERPROFILE%\.aistack\context.json — same schema as bash version.
+writes %USERPROFILE%\.sagestack\context.json — same schema as bash version.
 Always exits 0 (fail-open).
 """
 import json
@@ -318,7 +318,7 @@ def main():
             "source":     "context_writer.py",
         }
 
-        out_dir  = Path(os.environ.get("USERPROFILE", Path.home())) / ".aistack"
+        out_dir  = Path(os.environ.get("USERPROFILE", Path.home())) / ".sagestack"
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / "context.json"
 
@@ -357,7 +357,7 @@ if __name__ == "__main__":
             $claudeSettings["hooks"]["UserPromptSubmit"] = @()
         }
 
-        $hookCmd  = "python3 `"$env:USERPROFILE\.aistack\hooks\context_writer.py`""
+        $hookCmd  = "python3 `"$env:USERPROFILE\.sagestack\hooks\context_writer.py`""
         $existing = $claudeSettings["hooks"]["UserPromptSubmit"]
         $alreadyRegistered = $false
         foreach ($entry in $existing) {
@@ -386,7 +386,7 @@ if __name__ == "__main__":
             }
             $claudeSettings["hooks"]["UserPromptSubmit"] += $hookEntry
 
-            $tmpPath = "$claudeSettingsPath.aistack.tmp"
+            $tmpPath = "$claudeSettingsPath.sagestack.tmp"
             $claudeSettings | ConvertTo-Json -Depth 10 | Set-Content -Path $tmpPath -Encoding UTF8
             Move-Item -Path $tmpPath -Destination $claudeSettingsPath -Force
             Write-Ok "UserPromptSubmit hook registered in $claudeSettingsPath"
@@ -398,7 +398,7 @@ if __name__ == "__main__":
 Write-Header "7/7  Main installer (bash via WSL2)"
 
 if ($hasWsl) {
-    Write-Step "Running aistack-install.sh inside WSL2 ($WslDistro)..."
+    Write-Step "Running sagestack-install.sh inside WSL2 ($WslDistro)..."
 
     $bashArgs = ""
     if ($DryRun) { $bashArgs += " --dry-run" }
@@ -407,7 +407,7 @@ if ($hasWsl) {
     $bashCmd = @"
 set -euo pipefail
 if command -v curl &>/dev/null; then
-  bash <(curl -fsSL https://raw.githubusercontent.com/kitzplorer/sagent/main/scripts/aistack-install.sh)$bashArgs
+  bash <(curl -fsSL https://raw.githubusercontent.com/kitzplorer/sagent/main/scripts/sagestack-install.sh)$bashArgs
 else
   echo 'curl not found in WSL2. Install it: sudo apt-get install -y curl' >&2
   exit 1
@@ -440,7 +440,7 @@ fi
     Write-Host "║                                                                  ║" -ForegroundColor Yellow
     Write-Host "║  Once WSL2 is installed, run the bash installer directly:        ║" -ForegroundColor Yellow
     Write-Host "║    wsl -- bash <(curl -fsSL https://raw.githubusercontent.com/  ║" -ForegroundColor Cyan
-    Write-Host "║      kitzplorer/sagent/main/scripts/aistack-install.sh)          ║" -ForegroundColor Cyan
+    Write-Host "║      kitzplorer/sagent/main/scripts/sagestack-install.sh)          ║" -ForegroundColor Cyan
     Write-Host "║                                                                  ║" -ForegroundColor Yellow
     Write-Host "╚══════════════════════════════════════════════════════════════════╝" -ForegroundColor Yellow
     Write-Host ""
@@ -451,9 +451,9 @@ Write-Host ""
 if ($DryRun) {
     Write-Host "Dry-run complete — no files were modified." -ForegroundColor Yellow
 } else {
-    Write-Host "aistack Windows setup complete." -ForegroundColor Green
+    Write-Host "sagestack Windows setup complete." -ForegroundColor Green
     if ($hasWsl) {
-        Write-Host "The full aistack is now configured inside WSL2 ($WslDistro)." -ForegroundColor Green
+        Write-Host "The full sagestack is now configured inside WSL2 ($WslDistro)." -ForegroundColor Green
     }
 }
 Write-Host ""

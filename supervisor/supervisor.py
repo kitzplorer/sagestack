@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 supervisor.py — standalone AI-stack supervisor CLI
-~/.aistack/supervisor/supervisor.py
+~/.sagestack/supervisor/supervisor.py
 
 Usage:
     python3 supervisor.py status              # open claims + tier distribution

@@ -1,4 +1,4 @@
-# ~/.aistack/skills — General-Purpose Skill Library
+# ~/.sagestack/skills — General-Purpose Skill Library
 
 20 skills curated from the sagent/OpenClaw ecosystem. Each works on **any codebase** without sagent backend dependencies.
 
@@ -37,4 +37,4 @@ Excluded categories:
 
 ## Usage
 
-These skills are loaded by any Claude Code session that has `~/.aistack/skills/` in its skill path. Install into a specific project by copying the skill folder or referencing via marketplace.
+These skills are loaded by any Claude Code session that has `~/.sagestack/skills/` in its skill path. Install into a specific project by copying the skill folder or referencing via marketplace.

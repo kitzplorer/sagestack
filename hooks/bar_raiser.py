@@ -19,7 +19,7 @@ Per-project context auto-discovery (first hit wins):
   $CWD/services/code_agent/CONTEXT.md
   $CWD/CONTEXT.md
   $CWD/CLAUDE.md
-  ~/.aistack/CONTEXT.md
+  ~/.sagestack/CONTEXT.md
   (then legacy default ~/projects/sagent/services/code_agent/CONTEXT.md)
 
 Exit codes:
@@ -120,7 +120,7 @@ def _get_context_path() -> pathlib.Path:
         cwd / "services" / "code_agent" / "CONTEXT.md",
         cwd / "CONTEXT.md",
         cwd / "CLAUDE.md",
-        pathlib.Path.home() / ".aistack" / "CONTEXT.md",
+        pathlib.Path.home() / ".sagestack" / "CONTEXT.md",
     ]
     for c in candidates:
         if c.exists():

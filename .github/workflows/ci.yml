@@ -39,4 +39,4 @@ jobs:
       - name: Memory agent help
         run: python3 memory_agent.py --help
       - name: Install script dry-run
-        run: bash scripts/aistack-install.sh --dry-run
+        run: bash scripts/sagestack-install.sh --dry-run
